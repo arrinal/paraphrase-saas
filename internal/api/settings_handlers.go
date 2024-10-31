@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/arrinal/paraphrase-saas/internal/db"
 	"github.com/arrinal/paraphrase-saas/internal/models"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 

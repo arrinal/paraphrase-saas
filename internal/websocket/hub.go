@@ -90,7 +90,7 @@ func (h *Hub) BroadcastToUser(userID uint, eventType string, data interface{}) {
 // Add Read and Write methods to Client
 func (c *Client) Read() {
 	defer func() {
-		c.Hub.unregister <- c
+		c.Hub.Unregister <- c // Changed from unregister to Unregister
 		c.Conn.Close()
 	}()
 

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/arrinal/paraphrase-saas/internal/db"
 	"github.com/arrinal/paraphrase-saas/internal/models"
+	"github.com/gin-gonic/gin"
 )
 
 type StatsResponse struct {
