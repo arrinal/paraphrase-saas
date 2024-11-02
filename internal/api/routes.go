@@ -29,5 +29,11 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 		api.GET("/languages", HandleGetUsedLanguages())
 		api.GET("/stats", HandleGetUserStats())
 		api.PUT("/settings", HandleUpdateSettings())
+		api.GET("/subscription", HandleGetSubscription())
+		api.POST("/subscription/cancel", HandleCancelSubscription(cfg))
+		api.POST("/checkout/session", HandleCreateCheckoutSession(cfg))
 	}
+
+	// Paddle webhook (public)
+	r.POST("/api/webhook/paddle", HandleWebhook(cfg))
 }

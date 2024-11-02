@@ -27,6 +27,11 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	// Seed subscription plans
+	if err := db.SeedSubscriptionPlans(); err != nil {
+		log.Printf("Warning: Failed to seed subscription plans: %v", err)
+	}
+
 	// Initialize Gin router
 	r := gin.Default()
 
