@@ -24,7 +24,7 @@ func LoadConfig() (*Config, error) {
 
 	return &Config{
 		JWTSecret:       getEnvOrDefault("JWT_SECRET", "your-default-secret"),
-		DatabaseURL:     getEnvOrDefault("DATABASE_URL", "postgresql://postgres@localhost:5432/paraphrase_db"),
+		DatabaseURL:     getEnvOrDefault("DATABASE_URL", "postgresql://postgres@localhost:5432/frazai_db"),
 		ServerPort:      getEnvOrDefault("PORT", "8080"),
 		OpenAIKey:       getEnvOrDefault("OPENAI_API_KEY", ""),
 		FrontendURL:     getEnvOrDefault("FRONTEND_URL", "http://localhost:3000"),
