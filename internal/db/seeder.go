@@ -14,7 +14,7 @@ func SeedSubscriptionPlans() error {
 			Price:        999, // $9.99
 			Currency:     "USD",
 			Interval:     "month",
-			PaddlePlanID: "mock_basic_plan",
+			PaddlePlanID: "pri_basic",
 			Features: models.JSON(mustMarshal([]string{
 				"Up to 1,000 characters per request",
 				"50 requests per day",
@@ -32,7 +32,7 @@ func SeedSubscriptionPlans() error {
 			Price:        1999, // $19.99
 			Currency:     "USD",
 			Interval:     "month",
-			PaddlePlanID: "mock_pro_plan",
+			PaddlePlanID: "pri_pro",
 			Features: models.JSON(mustMarshal([]string{
 				"Up to 5,000 characters per request",
 				"Unlimited requests",

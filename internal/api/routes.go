@@ -24,7 +24,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 	api := r.Group("/api")
 	api.Use(middleware.AuthRequired(cfg))
 	{
-		api.POST("/paraphrase", HandleParaphrase(openAIService))
+		api.POST("/paraphrase", middleware.CheckSubscriptionLimits(), HandleParaphrase(openAIService))
 		api.GET("/history", HandleGetHistory())
 		api.GET("/languages", HandleGetUsedLanguages())
 		api.GET("/stats", HandleGetUserStats())
@@ -32,6 +32,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 		api.GET("/subscription", HandleGetSubscription())
 		api.POST("/subscription/cancel", HandleCancelSubscription(cfg))
 		api.POST("/checkout/session", HandleCreateCheckoutSession(cfg))
+		api.POST("/ios/verify-receipt", HandleVerifyIOSReceipt(cfg))
 	}
 
 	// Paddle webhook (public)

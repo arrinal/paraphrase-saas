@@ -16,13 +16,20 @@ type CreateCheckoutSessionRequest struct {
 }
 
 func HandleCreateCheckoutSession(cfg *config.Config) gin.HandlerFunc {
-	paddleService := services.NewMockPaddleService(cfg)
+	paddleService := services.NewPaddleService(cfg)
 
 	return func(c *gin.Context) {
 		userID, _ := c.Get("userID")
 		var req CreateCheckoutSessionRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		var existingSub models.Subscription
+		if err := db.DB.Where("user_id = ? AND status = ?", userID, "active").
+			First(&existingSub).Error; err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "user already has an active subscription"})
 			return
 		}
 
@@ -37,7 +44,7 @@ func HandleCreateCheckoutSession(cfg *config.Config) gin.HandlerFunc {
 }
 
 func HandleWebhook(cfg *config.Config) gin.HandlerFunc {
-	paddleService := services.NewMockPaddleService(cfg)
+	paddleService := services.NewPaddleService(cfg)
 
 	return func(c *gin.Context) {
 		payload, err := c.GetRawData()
@@ -66,7 +73,8 @@ func HandleGetSubscription() gin.HandlerFunc {
 		userID, _ := c.Get("userID")
 
 		var subscription models.Subscription
-		if err := db.DB.Where("user_id = ? AND status = ?", userID, "active").First(&subscription).Error; err != nil {
+		if err := db.DB.Where("user_id = ? AND status = ?", userID, "active").
+			First(&subscription).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "no active subscription found"})
 			return
 		}
@@ -76,30 +84,23 @@ func HandleGetSubscription() gin.HandlerFunc {
 }
 
 func HandleCancelSubscription(cfg *config.Config) gin.HandlerFunc {
-	paddleService := services.NewMockPaddleService(cfg)
+	paddleService := services.NewPaddleService(cfg)
 
 	return func(c *gin.Context) {
 		userID, _ := c.Get("userID")
 
-		var sub models.Subscription
-		if err := db.DB.Where("user_id = ? AND status = ?", userID, "active").First(&sub).Error; err != nil {
+		var subscription models.Subscription
+		if err := db.DB.Where("user_id = ? AND status = ?", userID, "active").
+			First(&subscription).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "no active subscription found"})
 			return
 		}
 
-		// Cancel subscription in Paddle
-		if err := paddleService.CancelSubscription(sub.PaddleSubID); err != nil {
+		if err := paddleService.CancelSubscription(subscription.PaddleSubID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to cancel subscription"})
 			return
 		}
 
-		// Update subscription in database
-		sub.Status = "canceled"
-		if err := db.DB.Save(&sub).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update subscription"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "subscription canceled"})
+		c.JSON(http.StatusOK, gin.H{"message": "subscription cancelled successfully"})
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/arrinal/paraphrase-saas/internal/db"
+	"github.com/arrinal/paraphrase-saas/internal/middleware"
 	"github.com/arrinal/paraphrase-saas/internal/models"
 	"github.com/arrinal/paraphrase-saas/internal/services"
 	"github.com/gin-gonic/gin"
@@ -23,12 +24,48 @@ type ParaphraseResponse struct {
 	Language    string `json:"language"` // Add this field
 }
 
-func HandleParaphrase(openAI *services.OpenAIService) gin.HandlerFunc {
+func HandleParaphrase(openAIService *services.OpenAIService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Get plan limits from context
+		planLimits, exists := c.Get("planLimits")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "plan limits not found"})
+			return
+		}
+		limits := planLimits.(middleware.PlanLimits)
+
+		// Get request body
 		var req ParaphraseRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
+		}
+
+		// Check character limit
+		if len(req.Text) > limits.CharactersPerRequest {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error": "text exceeds character limit for your plan",
+				"limit": limits.CharactersPerRequest,
+			})
+			return
+		}
+
+		// Check daily request limit if it's not unlimited (-1)
+		if limits.RequestsPerDay > 0 {
+			userID, _ := c.Get("userID")
+			today := time.Now().UTC().Truncate(24 * time.Hour)
+			var count int64
+			db.DB.Model(&models.ParaphraseHistory{}).
+				Where("user_id = ? AND created_at >= ?", userID, today).
+				Count(&count)
+
+			if int(count) >= limits.RequestsPerDay {
+				c.JSON(http.StatusForbidden, gin.H{
+					"error": "daily request limit reached",
+					"limit": limits.RequestsPerDay,
+				})
+				return
+			}
 		}
 
 		userID, _ := c.Get("userID")
@@ -36,7 +73,7 @@ func HandleParaphrase(openAI *services.OpenAIService) gin.HandlerFunc {
 		// If language is auto, detect it first
 		actualLanguage := req.Language
 		if req.Language == "auto" {
-			detected, err := openAI.GetDetectedLanguage(req.Text)
+			detected, err := openAIService.GetDetectedLanguage(req.Text)
 			if err != nil {
 				log.Printf("Language detection error: %v", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to detect language"})
@@ -45,7 +82,7 @@ func HandleParaphrase(openAI *services.OpenAIService) gin.HandlerFunc {
 			actualLanguage = detected
 		}
 
-		paraphrased, err := openAI.Paraphrase(req.Text, req.Language, req.Style)
+		paraphrased, err := openAIService.Paraphrase(req.Text, req.Language, req.Style)
 		if err != nil {
 			log.Printf("Paraphrase error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

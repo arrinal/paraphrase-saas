@@ -23,6 +23,10 @@ func Initialize(dbURL string) error {
 	err = db.AutoMigrate(
 		&models.User{},
 		&models.ParaphraseHistory{},
+		&models.Subscription{},
+		&models.SubscriptionPlan{},
+		&models.UserStats{},
+		&models.DailyUsage{},
 	)
 	if err != nil {
 		return err
