@@ -32,8 +32,12 @@ func NewRealPaddleService(cfg *config.Config) *PaddleService {
 }
 
 func (s *PaddleService) CreateCheckoutSession(userID uint, planID string) (string, error) {
-	priceID, ok := s.cfg.PaddlePriceIDs[planID]
-	if !ok {
+	var priceID string
+
+	// Since we only have Pro plan now
+	if planID == "pro" {
+		priceID = s.cfg.PaddleProPriceID
+	} else {
 		return "", fmt.Errorf("invalid plan ID")
 	}
 

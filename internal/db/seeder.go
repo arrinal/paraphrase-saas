@@ -9,39 +9,21 @@ import (
 func SeedSubscriptionPlans() error {
 	plans := []models.SubscriptionPlan{
 		{
-			ID:           "basic",
-			Name:         "Basic",
-			Price:        999, // $9.99
-			Currency:     "USD",
-			Interval:     "month",
-			PaddlePlanID: "pri_basic",
-			Features: models.JSON(mustMarshal([]string{
-				"Up to 1,000 characters per request",
-				"50 requests per day",
-				"Standard paraphrasing styles",
-			})),
-			Limits: models.JSON(mustMarshal(map[string]interface{}{
-				"charactersPerRequest": 1000,
-				"requestsPerDay":       50,
-				"bulkParaphrase":       false,
-			})),
-		},
-		{
 			ID:           "pro",
-			Name:         "Professional",
-			Price:        1999, // $19.99
+			Name:         "Pro",
+			Price:        500, // $5.00
 			Currency:     "USD",
 			Interval:     "month",
-			PaddlePlanID: "pri_pro",
+			PaddlePlanID: "pro",
 			Features: models.JSON(mustMarshal([]string{
-				"Up to 5,000 characters per request",
-				"Unlimited requests",
+				"Paraphrase in any language (auto-detect)",
+				"Paraphrase and translate at the same time",
+				"Unlimited paraphrase with AI",
 				"All paraphrasing styles",
-				"Bulk paraphrasing",
 			})),
 			Limits: models.JSON(mustMarshal(map[string]interface{}{
-				"charactersPerRequest": 5000,
-				"requestsPerDay":       -1,
+				"charactersPerRequest": 10000, // unlimited
+				"requestsPerDay":       -1,    // unlimited
 				"bulkParaphrase":       true,
 			})),
 		},

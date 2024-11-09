@@ -70,31 +70,21 @@ func HandleParaphrase(openAIService *services.OpenAIService) gin.HandlerFunc {
 
 		userID, _ := c.Get("userID")
 
-		// If language is auto, detect it first
-		actualLanguage := req.Language
-		if req.Language == "auto" {
-			detected, err := openAIService.GetDetectedLanguage(req.Text)
-			if err != nil {
-				log.Printf("Language detection error: %v", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to detect language"})
-				return
-			}
-			actualLanguage = detected
-		}
-
-		paraphrased, err := openAIService.Paraphrase(req.Text, req.Language, req.Style)
+		// If language is auto, we don't need separate detection anymore
+		// as it's handled in the Paraphrase function now
+		paraphraseResult, err := openAIService.Paraphrase(req.Text, req.Language, req.Style)
 		if err != nil {
 			log.Printf("Paraphrase error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Save to history with the actual detected language
+		// Save to history with the detected/specified language
 		history := models.ParaphraseHistory{
 			UserID:          userID.(uint),
 			OriginalText:    req.Text,
-			ParaphrasedText: paraphrased,
-			Language:        actualLanguage,
+			ParaphrasedText: paraphraseResult.ParaphrasedText,  // Use ParaphrasedText from result
+			Language:        paraphraseResult.DetectedLanguage, // Use DetectedLanguage from result
 			Style:           req.Style,
 		}
 
@@ -130,8 +120,8 @@ func HandleParaphrase(openAIService *services.OpenAIService) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"paraphrased": paraphrased,
-			"language":    actualLanguage,
+			"paraphrased": paraphraseResult.ParaphrasedText,
+			"language":    paraphraseResult.DetectedLanguage,
 			"history_id":  history.ID,
 		})
 	}
