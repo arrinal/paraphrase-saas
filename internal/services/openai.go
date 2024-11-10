@@ -38,8 +38,8 @@ type OpenAIResponse struct {
 }
 
 type ParaphraseResponse struct {
-	DetectedLanguage string
-	ParaphrasedText  string
+	Paraphrased      string `json:"paraphrased"`
+	DetectedLanguage string `json:"detected_language"`
 }
 
 func NewOpenAIService(cfg *config.Config) *OpenAIService {
@@ -208,15 +208,15 @@ Text: %s`, language, style, styleGuide, text)
 		paraphrasedText := strings.Join(lines[2:], "\n")
 
 		return &ParaphraseResponse{
+			Paraphrased:      paraphrasedText,
 			DetectedLanguage: detectedLanguage,
-			ParaphrasedText:  paraphrasedText,
 		}, nil
 	}
 
 	// For non-auto cases, return the specified language
 	return &ParaphraseResponse{
+		Paraphrased:      response.Choices[0].Message.Content,
 		DetectedLanguage: language,
-		ParaphrasedText:  response.Choices[0].Message.Content,
 	}, nil
 }
 
@@ -235,7 +235,7 @@ func (s *OpenAIService) GetDetectedLanguage(text string) (string, error) {
 	}
 
 	// Extract language from the first line
-	lines := strings.Split(response.ParaphrasedText, "\n")
+	lines := strings.Split(response.Paraphrased, "\n")
 	if len(lines) < 1 {
 		return "", fmt.Errorf("invalid response format")
 	}

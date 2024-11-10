@@ -22,7 +22,7 @@ type Subscription struct {
 type SubscriptionPlan struct {
 	ID           string    `gorm:"primaryKey" json:"id"`
 	Name         string    `json:"name"`
-	Price        int64     `json:"price"` // in cents
+	Price        int64     `json:"price"`
 	Currency     string    `json:"currency"`
 	Interval     string    `json:"interval"`
 	PaddlePlanID string    `json:"paddle_plan_id"`

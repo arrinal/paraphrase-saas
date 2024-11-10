@@ -9,6 +9,24 @@ import (
 func SeedSubscriptionPlans() error {
 	plans := []models.SubscriptionPlan{
 		{
+			ID:       "trial",
+			Name:     "Trial",
+			Price:    0,
+			Currency: "USD",
+			Interval: "once",
+			Features: models.JSON(mustMarshal([]string{
+				"Paraphrase in English only",
+				"Standard paraphrasing style",
+				"5 paraphrases with AI",
+				"1000 characters per request",
+			})),
+			Limits: models.JSON(mustMarshal(map[string]interface{}{
+				"charactersPerRequest": 1000,
+				"requestsPerDay":       5,
+				"bulkParaphrase":       false,
+			})),
+		},
+		{
 			ID:           "pro",
 			Name:         "Pro",
 			Price:        500, // $5.00

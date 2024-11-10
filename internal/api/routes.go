@@ -30,6 +30,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 		api.GET("/stats", HandleGetUserStats())
 		api.PUT("/settings", HandleUpdateSettings())
 		api.GET("/subscription", HandleGetSubscription())
+		api.POST("/subscription/trial", HandleActivateTrial())
 		api.POST("/subscription/cancel", HandleCancelSubscription(cfg))
 		api.POST("/checkout/session", HandleCreateCheckoutSession(cfg))
 		api.POST("/ios/verify-receipt", HandleVerifyIOSReceipt(cfg))

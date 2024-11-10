@@ -18,16 +18,19 @@ func NewMockPaddleService(cfg *config.Config) *MockPaddleService {
 }
 
 func (s *MockPaddleService) CreateCheckoutSession(userID uint, planID string) (string, error) {
-	// Create mock subscription in database immediately
+	// Generate unique subscription ID with timestamp to avoid conflicts
+	paddleSubID := fmt.Sprintf("mock_sub_%d_%s_%d", userID, planID, time.Now().Unix())
+
+	// Create mock subscription
 	subscription := models.Subscription{
 		UserID:           userID,
 		PlanID:           planID,
 		Status:           "active",
-		PaddleSubID:      fmt.Sprintf("mock_sub_%d_%s", userID, planID),
+		PaddleSubID:      paddleSubID,
 		CurrentPeriodEnd: time.Now().AddDate(0, 1, 0), // 1 month from now
 	}
 
-	// Save to database
+	// Create new subscription
 	if err := db.DB.Create(&subscription).Error; err != nil {
 		return "", fmt.Errorf("failed to create subscription: %v", err)
 	}
