@@ -43,3 +43,23 @@ func ValidateToken(tokenString string, secret string) (*Claims, error) {
 
 	return nil, fmt.Errorf("invalid token")
 }
+
+func GenerateTokenPair(userID uint, secret string) (token string, refreshToken string, err error) {
+	// Access token - short lived (15 minutes)
+	token, err = GenerateToken(userID, secret)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Refresh token - longer lived (7 days)
+	refreshClaims := &Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(secret))
+	return token, refreshToken, err
+}

@@ -45,14 +45,15 @@ func HandleLogin(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		token, err := auth.GenerateToken(user.ID, cfg.JWTSecret)
+		token, refreshToken, err := auth.GenerateTokenPair(user.ID, cfg.JWTSecret)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate tokens"})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"token": token,
+			"token":         token,
+			"refresh_token": refreshToken,
 			"user": gin.H{
 				"id":    user.ID,
 				"name":  user.Name,
@@ -103,15 +104,16 @@ func HandleRegister(cfg *config.Config) gin.HandlerFunc {
 
 		log.Printf("Successfully created user: %s (ID: %d)", user.Email, user.ID)
 
-		token, err := auth.GenerateToken(user.ID, cfg.JWTSecret)
+		token, refreshToken, err := auth.GenerateTokenPair(user.ID, cfg.JWTSecret)
 		if err != nil {
-			log.Printf("Failed to generate token: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+			log.Printf("Failed to generate tokens: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate tokens"})
 			return
 		}
 
 		c.JSON(http.StatusCreated, gin.H{
-			"token": token,
+			"token":         token,
+			"refresh_token": refreshToken,
 			"user": gin.H{
 				"id":    user.ID,
 				"name":  user.Name,
