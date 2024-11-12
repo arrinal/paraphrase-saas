@@ -181,3 +181,14 @@ func HandleWebhook(cfg *config.Config) gin.HandlerFunc {
 		c.Status(http.StatusOK)
 	}
 }
+
+func HandleCheckSubscription() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.MustGet("userID").(uint) // Assuming you have userID in context
+
+		var count int64
+		db.DB.Model(&models.Subscription{}).Where("user_id = ? AND plan_id = ?", userID, "pro").Count(&count)
+
+		c.JSON(http.StatusOK, gin.H{"hasPro": count > 0})
+	}
+}

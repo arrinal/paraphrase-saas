@@ -34,6 +34,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 		api.POST("/subscription/cancel", HandleCancelSubscription(cfg))
 		api.POST("/checkout/session", HandleCreateCheckoutSession(cfg))
 		api.POST("/ios/verify-receipt", HandleVerifyIOSReceipt(cfg))
+		api.GET("/subscription/check", HandleCheckSubscription())
 	}
 
 	// Paddle webhook (public)

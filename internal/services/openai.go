@@ -127,7 +127,7 @@ Make sure to make substantial structural changes by following these steps:
 %s
 
 The goal is to create a rewritten version that looks structurally different, with minimal overlap in wording, especially if analyzed with a diff checker, and apply similar structural changes. 
-Only return the rewritten text without quotation marks at the beginning and end.
+Only return the rewritten text without quotation marks at the beginning and end. If the text language is not detected, return the original text.
 
 Text: %s`, style, styleGuide, text)
 	} else {
@@ -147,7 +147,7 @@ Make sure to make substantial structural changes by following these steps:
 %s
 
 The goal is to create a rewritten version that looks structurally different, with minimal overlap in wording, especially if analyzed with a diff checker, and apply similar structural changes. 
-Only return the rewritten text without quotation marks at the beginning and end.
+Only return the rewritten text without quotation marks at the beginning and end. If the text language is not detected, return the original text.
 
 Text: %s`, language, style, styleGuide, text)
 	}
