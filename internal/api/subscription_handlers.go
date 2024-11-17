@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -95,33 +93,6 @@ func HandleGetSubscription() gin.HandlerFunc {
 	}
 }
 
-func HandleActivateTrial() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userID, _ := c.Get("userID")
-
-		var existingSub models.Subscription
-		if err := db.DB.Where("user_id = ?", userID).First(&existingSub).Error; err == nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "user already has a subscription"})
-			return
-		}
-
-		subscription := models.Subscription{
-			UserID:      userID.(uint),
-			PlanID:      "trial",
-			Status:      "active",
-			PaddleSubID: fmt.Sprintf("trial_%d", userID.(uint)),
-		}
-
-		if err := db.DB.Create(&subscription).Error; err != nil {
-			log.Printf("Failed to create trial subscription: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create trial subscription"})
-			return
-		}
-
-		c.JSON(http.StatusOK, subscription)
-	}
-}
-
 func HandleCancelSubscription(cfg *config.Config) gin.HandlerFunc {
 	paddleService := services.NewPaddleService(cfg)
 
@@ -184,7 +155,7 @@ func HandleWebhook(cfg *config.Config) gin.HandlerFunc {
 
 func HandleCheckSubscription() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID := c.MustGet("userID").(uint) // Assuming you have userID in context
+		userID := c.MustGet("userID").(uint)
 
 		var count int64
 		db.DB.Model(&models.Subscription{}).Where("user_id = ? AND plan_id = ?", userID, "pro").Count(&count)
